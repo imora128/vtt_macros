@@ -52,7 +52,7 @@ function OutputManySameDice(dicearray, modifier){
 	let diceRollMod = "";
 	let diceModOperator = dicearray[0].terms[1].operator;
 	let diceModVal = dicearray[0].terms[2].number;
-	let finalNum = "0";
+	let finalNum = "";
 	var finalNumArr = [];
 	let output = `
 <div class="dice-roll">
@@ -65,7 +65,9 @@ function OutputManySameDice(dicearray, modifier){
 		diceFaces = dicearray[i].dice[0].faces;
 
 		if (dicearray[i].terms[0].modifiers[0]) {
-			diceRollMod = diceRollMod;
+			diceRollMod = dicearray[i].terms[0].modifiers[0];
+		} else {
+			diceRollMod = "";
 		}
 
 		if (dicearray[i].terms[1].operator){
@@ -75,16 +77,25 @@ function OutputManySameDice(dicearray, modifier){
 		if (dicearray[i].terms[2].number){
 			diceModVal = dicearray[i].terms[2].number;
 		}
-
 		output += `
 		<div class="dice-tooltip">
 		<section class="tooltip-part">
 			<div class="dice">
 				<header class="part-header flexrow">
 				<span class="part-formula">${diceNum}d${diceFaces}${diceRollMod} ${diceModOperator} ${diceModVal}</span>`
+
 				for (var z = 0; z < dicearray[i].terms[0].results.length; z++) {
-					if (parseInt(finalNum) < parseInt(dicearray[i].terms[0].results[z].result) ) {
+					if (finalNum == ""){
 						finalNum = parseInt(dicearray[i].terms[0].results[z].result);
+					}
+					if (diceRollMod == "kh") {
+						if (parseInt(finalNum) < parseInt(dicearray[i].terms[0].results[z].result) ) {
+							finalNum = parseInt(dicearray[i].terms[0].results[z].result);
+						}
+					} else if (diceRollMod == "kl") {
+						if (parseInt(finalNum) > parseInt(dicearray[i].terms[0].results[z].result) ) {
+							finalNum = parseInt(dicearray[i].terms[0].results[z].result);
+						}
 					}
 					output+= `<span class="part-total">${dicearray[i].terms[0].results[z].result}</span>`
 				}
@@ -107,13 +118,13 @@ function OutputManySameDice(dicearray, modifier){
 		</div>
 		`
 		finalNumArr.push(finalNum);
-		finalNum = 0;
+		finalNum = "";
 	}
 
 
 	for (var i = 0; i < dicearray.length; i++) {
 		//for (var k = 0; i < finalNumArr.length; k++) {
-			console.log(finalNumArr[i])
+			//console.log(finalNumArr[i])
 		//}
 		if (parseInt(finalNumArr[i]) == 1) {
 			output += `<h4 class="dice-total fumble">${dicearray[i].total}</h4>`
@@ -176,6 +187,21 @@ new Dialog({
 					<option value="8">8</option>
 				</select>
 			</div>
+
+			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
+				<label for="disAdvNum" style="margin-right: 10px">Disadvantage</label>
+				<select id="disAdvNum" />
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+				</select>
+			</div>
 	`,
 	buttons: {
 		yes: {
@@ -189,8 +215,9 @@ new Dialog({
 				var selectedBeastIndex = html.find('#beastType')[0].options.selectedIndex;
 				var selectedBeastLabel = html.find('#beastType')[0][selectedBeastIndex].label;
 				let numAdv = html.find('#advNum').val();
+				let disAdvNum = html.find('#disAdvNum').val();
 				let rollCmd = ""
-				console.log("This is numadv: " + numAdv);
+				//console.log("This is disadvnumadv: " + numAdv);
 				var atkBonus = {
 				  Wolf: `4`,
 				  GiantPoisonousSnake: `6`
@@ -202,19 +229,23 @@ new Dialog({
 					if (numAdv > 0) {
 						rollCmd = "2d20kh"
 						numAdv--;
-					} else {
-						rollCmd = "1d20"
+					} else if (disAdvNum > 0 ){
+						rollCmd = "2d20kl";
+						disAdvNum--;
 					}
+					else {
+							rollCmd = "1d20"
+						}
 
 					let roll = new Roll(`${rollCmd}+${atkBonus[beastType]}`);
 
 					rolls.push(roll.evaluate({async: false}));
-					console.log(rolls);
-					console.log("die below:")
-					console.log(rolls[rolls.length - 1].terms[0]);
+					//console.log(rolls);
+					//console.log("die below:")
+					//console.log(rolls[rolls.length - 1].terms[0]);
 					// console.log(rolls[rolls.length - 1].terms[0].results);
-					console.log("modifier: " + rolls[rolls.length - 1].terms[0].modifiers);
-					console.log("len is: " + rolls.length)
+					//console.log("modifier: " + rolls[rolls.length - 1].terms[0].modifiers);
+					//console.log("len is: " + rolls.length)
 
 					debugOutput = debugOutput.concat(rolls[rolls.length - 1].total);
 					debugOutput = debugOutput.concat(" ");
