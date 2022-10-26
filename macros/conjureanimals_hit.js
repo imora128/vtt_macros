@@ -13,48 +13,74 @@ function printMessage(message){
 
 
 function OutputManySameDice(dicearray, modifier){
+	let diceNum = "0";
+	let diceFaces = "20";
+	let diceRollMod = "";
+	let diceModOperator = "";
+	let diceModVal = "";
+	let finalNum = "0";
+	//let 
 	let output = `
 <div class="dice-roll">
 	<div class="dice-result">
-		<div class="dice-formula">${dicearray.length}d${dicearray[0].dice[0].faces} + ${modifier}</div>
-		<div class="dice-tooltip">
-			<section class="tooltip-part">
-				<div class="dice">
-					<header class="part-header flexrow">
-					<span class="part-formula">${dicearray.length}d${dicearray[0].dice[0].faces}</span>`
+		<div class="dice-formula">${dicearray.length}d${dicearray[0].dice[0].faces} + ${diceRollMod}</div>`
 
-	for (var i = 0; i < dicearray.length; i++) {
+
+	for (var i = 0; i < dicearray.length; i++) { //rolls[rolls.length - 1].terms[0]
+		diceNum = dicearray[i].terms[0].number;
+		diceFaces = dicearray[i].dice[0].faces;
+
+		if (dicearray[i].terms[0].modifiers[0]) {
+			diceRollMod = dicearray[i].terms[0].modifiers[0];
+		}
+
+		if (dicearray[i].terms[1].operator){
+			diceModOperator =dicearray[i].terms[1].operator;
+		}
+
+		if (dicearray[i].terms[2].number){
+			diceModVal = dicearray[i].terms[2].number;
+		}
+
 		output += `
-						<span class="part-total">${dicearray[i].terms[0].results[0].result}</span>`
-	}
-
-	output = output + `
-						</header>
-						<ol class="dice-rolls">`
-
-	for (var i = 0; i < dicearray.length; i++) {
-		if (dicearray[i].terms[0].results[0].result == 1) {
-			output += `<li class="roll die d${dicearray[i].dice[0].faces} min">${dicearray[i].terms[0].results[0].result}</li>`
-		}
-		else if (dicearray[i].terms[0].results[0].result == dicearray[i].dice[0].faces){
-			output += `<li class="roll die d${dicearray[i].dice[0].faces} max">${dicearray[i].terms[0].results[0].result}</li>`
-		}
-		else{
-			output += `<li class="roll die d${dicearray[i].dice[0].faces}">${dicearray[i].terms[0].results[0].result}</li>`
-		}
-	}
-	output = output + `    
+		<div class="dice-tooltip">
+		<section class="tooltip-part">
+			<div class="dice">
+				<header class="part-header flexrow">
+				<span class="part-formula">${diceNum}d${diceFaces}${diceRollMod} ${diceModOperator} ${diceModVal}</span>`
+				for (var z = 0; z < dicearray[i].terms[0].results.length; z++) {
+					if (parseInt(finalNum) < parseInt(dicearray[i].terms[0].results[z].result) ) {
+						finalNum = parseInt(dicearray[i].terms[0].results[z].result);
+					}
+					output+= `<span class="part-total">${dicearray[i].terms[0].results[z].result}</span>`
+				}
+			output = output + `
+				</header>
+				<ol class="dice-rolls">`
+				if (finalNum == 1) {
+					output += `<li class="roll die d${dicearray[i].dice[0].faces} min">${finalNum}</li>`
+				}
+				else if (finalNum == dicearray[i].dice[0].faces){
+					output += `<li class="roll die d${dicearray[i].dice[0].faces} max">${finalNum}</li>`
+				}
+				else{
+					output += `<li class="roll die d${dicearray[i].dice[0].faces}">${finalNum}</li>`
+				}
+					output = output + `    
 					</ol>
 				</div>
 			</section>
 		</div>
 		`
+		finalNum = 0;
+	}
+
 
 	for (var i = 0; i < dicearray.length; i++) {
-		if (dicearray[i].terms[0].results[0].result == 1) {
+		if (parseInt(dicearray[i].terms[0].results[0].result) == 1) {
 			output += `<h4 class="dice-total fumble">${dicearray[i].total}</h4>`
 		}
-		else if (dicearray[i].terms[0].results[0].result == dicearray[i].dice[0].faces){
+		else if (parseInt(dicearray[i].terms[0].results[0].result) == parseInt(dicearray[i].dice[0].faces)){
 			output += `<h4 class="dice-total critical">${dicearray[i].total}</h4>`
 		}
 		else{
@@ -79,7 +105,7 @@ new Dialog({
 	content: `
 		<form>
 			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
-				<label for="output-options" style="margin-right: 10px">Beast:</label>
+				<label for="beastType" style="margin-right: 10px">Beast:</label>
 				<select id="beastType" />
 					<option value="Wolf">Wolf</option>
 					<option value="GiantPoisonousSnake">Giant Poisonous Snake</option>
@@ -88,6 +114,20 @@ new Dialog({
 			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
 				<label for="output-options" style="margin-right: 10px">Number of beasts:</label>
 				<select id="output-options" />
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+				</select>
+			</div>
+			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
+				<label for="advNum" style="margin-right: 10px">Advantage</label>
+				<select id="advNum" />
+					<option value="0">0</option>
 					<option value="1">1</option>
 					<option value="2">2</option>
 					<option value="3">3</option>
@@ -110,29 +150,41 @@ new Dialog({
 				var beastType = html.find('#beastType').val();
 				var selectedBeastIndex = html.find('#beastType')[0].options.selectedIndex;
 				var selectedBeastLabel = html.find('#beastType')[0][selectedBeastIndex].label;
-				
+				let numAdv = html.find('#advNum').val();
+				let rollCmd = ""
+				console.log("This is numadv: " + numAdv);
 				var atkBonus = {
 				  Wolf: `4`,
 				  GiantPoisonousSnake: `6`
 				};
 				
-				printMessage("Testing bonus: " + atkBonus[beastType] );
-				
 
 				//Do attack Rolls
 				for (var i = 0; i < count; i++) {
-					let roll = new Roll(`1d20+${atkBonus[beastType]}`);
+					if (numAdv > 0) {
+						rollCmd = "2d20kh"
+						numAdv--;
+					} else {
+						rollCmd = "1d20"
+					}
+					console.log("numdice = " + numDice);
+
+					let roll = new Roll(`${rollCmd}+${atkBonus[beastType]}`);
 
 					rolls.push(roll.evaluate({async: false}));
-					//console.log(rolls);
-					//console.log(rolls[rolls.length - 1].terms);
+					console.log(rolls);
+					console.log("die below:")
+					console.log(rolls[rolls.length - 1].terms[0]);
+					// console.log(rolls[rolls.length - 1].terms[0].results);
+					console.log("modifier: " + rolls[rolls.length - 1].terms[0].modifiers);
+					console.log("len is: " + rolls.length)
 
 					debugOutput = debugOutput.concat(rolls[rolls.length - 1].total);
 					debugOutput = debugOutput.concat(" ");
 				}
 
 
-				//console.log(debugOutput);
+				//console.log("REE " + debugOutput);
 				printMessage("Conjure Animals ("+selectedBeastLabel+") Attacks: " + OutputManySameDice(rolls,atkBonus[beastType]));
 
 			}
