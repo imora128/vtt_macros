@@ -11,19 +11,54 @@ function printMessage(message){
 	ChatMessage.create(chatData,{});	
 }
 
+function getNumRollTypes(dicearray) {
+	let straight = 0;
+	let adv = 0;
+	let dis = 0;
+	let finalStr = "(";
+	for (var i = 0; i < dicearray.length; i++) {
+
+		if (dicearray[i].terms[0].modifiers[0]) {
+			if (dicearray[i].terms[0].modifiers[0] == "kh") { 
+				adv++;
+			}
+			else if (dicearray[i].terms[0].modifiers[0] == "kl") { 
+				dis++;
+			}
+		} else {
+			straight++;
+		}
+	}
+
+	if (straight > 0) {
+		finalStr += "S: " + straight + ", ";
+	}
+
+	if (adv > 0) {
+		finalStr += "A: " + adv + ", ";
+	}
+
+	if (dis > 0) {
+		finalStr += "D: " + dis + ", ";
+	}
+	return finalStr.slice(0, finalStr.length - 2) + ")";
+
+}
+
 
 function OutputManySameDice(dicearray, modifier){
 	let diceNum = "0";
 	let diceFaces = "20";
 	let diceRollMod = "";
-	let diceModOperator = "";
-	let diceModVal = "";
+	let diceModOperator = dicearray[0].terms[1].operator;
+	let diceModVal = dicearray[0].terms[2].number;
 	let finalNum = "0";
+	var finalNumArr = [];
 	//let 
 	let output = `
 <div class="dice-roll">
 	<div class="dice-result">
-		<div class="dice-formula">${dicearray.length}d${dicearray[0].dice[0].faces} + ${diceRollMod}</div>`
+		<div class="dice-formula">${dicearray.length}d${dicearray[0].dice[0].faces} ${diceModOperator} ${diceModVal} ${getNumRollTypes(dicearray)}</div>`
 
 
 	for (var i = 0; i < dicearray.length; i++) { //rolls[rolls.length - 1].terms[0]
@@ -31,7 +66,7 @@ function OutputManySameDice(dicearray, modifier){
 		diceFaces = dicearray[i].dice[0].faces;
 
 		if (dicearray[i].terms[0].modifiers[0]) {
-			diceRollMod = dicearray[i].terms[0].modifiers[0];
+			diceRollMod = diceRollMod;
 		}
 
 		if (dicearray[i].terms[1].operator){
@@ -57,10 +92,10 @@ function OutputManySameDice(dicearray, modifier){
 			output = output + `
 				</header>
 				<ol class="dice-rolls">`
-				if (finalNum == 1) {
+				if (parseInt(finalNum) == 1) {
 					output += `<li class="roll die d${dicearray[i].dice[0].faces} min">${finalNum}</li>`
 				}
-				else if (finalNum == dicearray[i].dice[0].faces){
+				else if (parseInt(finalNum) == parseInt(dicearray[i].dice[0].faces)){
 					output += `<li class="roll die d${dicearray[i].dice[0].faces} max">${finalNum}</li>`
 				}
 				else{
@@ -72,19 +107,23 @@ function OutputManySameDice(dicearray, modifier){
 			</section>
 		</div>
 		`
+		finalNumArr.push(finalNum);
 		finalNum = 0;
 	}
 
 
 	for (var i = 0; i < dicearray.length; i++) {
-		if (parseInt(dicearray[i].terms[0].results[0].result) == 1) {
+		//for (var k = 0; i < finalNumArr.length; k++) {
+			console.log(finalNumArr[i])
+		//}
+		if (parseInt(finalNumArr[i]) == 1) {
 			output += `<h4 class="dice-total fumble">${dicearray[i].total}</h4>`
 		}
-		else if (parseInt(dicearray[i].terms[0].results[0].result) == parseInt(dicearray[i].dice[0].faces)){
+		else if (parseInt(finalNumArr[i]) == parseInt(dicearray[i].dice[0].faces)){
 			output += `<h4 class="dice-total critical">${dicearray[i].total}</h4>`
 		}
 		else{
-			output += `<h4 class="dice-total">${dicearray[i].total}</h4>`
+			output += `<h4 class="dice-total">${finalNumArr[i]}</h4>`
 		}
 	}
 
