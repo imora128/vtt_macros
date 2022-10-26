@@ -54,7 +54,6 @@ function OutputManySameDice(dicearray, modifier){
 	let diceModVal = dicearray[0].terms[2].number;
 	let finalNum = "0";
 	var finalNumArr = [];
-	//let 
 	let output = `
 <div class="dice-roll">
 	<div class="dice-result">
@@ -206,7 +205,6 @@ new Dialog({
 					} else {
 						rollCmd = "1d20"
 					}
-					console.log("numdice = " + numDice);
 
 					let roll = new Roll(`${rollCmd}+${atkBonus[beastType]}`);
 
