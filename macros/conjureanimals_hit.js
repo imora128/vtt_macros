@@ -123,7 +123,7 @@ function OutputManySameDice(dicearray, modifier){
 			output += `<h4 class="dice-total critical">${dicearray[i].total}</h4>`
 		}
 		else{
-			output += `<h4 class="dice-total">${finalNumArr[i]}</h4>`
+			output += `<h4 class="dice-total">${dicearray[i].total}</h4>`
 		}
 	}
 
