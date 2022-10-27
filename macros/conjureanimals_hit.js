@@ -1,9 +1,11 @@
 //ADAPTED FROM https://github.com/foundry-vtt-community/macros/blob/main/5e/animate_tiny_weapons.js
 
-function printMessage(message){
+function printMessage(message, rollz){
 	let chatData = {
 		user : game.user._id,
 		content : message,
+		rolls:rollz,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL
 		//blind: true,
 		//whisper : game.users.filter(u => u.isGM).map(u => u.data._id)
 	};
@@ -253,7 +255,7 @@ new Dialog({
 
 
 				//console.log("REE " + debugOutput);
-				printMessage("Conjure Animals ("+selectedBeastLabel+") Attacks: " + OutputManySameDice(rolls,atkBonus[beastType]));
+				printMessage("Conjure Animals ("+selectedBeastLabel+") Attacks: " + OutputManySameDice(rolls,atkBonus[beastType]), rolls);
 
 			}
 		},
