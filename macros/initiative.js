@@ -12,23 +12,36 @@ new Dialog({
 				<input type="checkbox" id="giftAlacrity">
 			</div>
 			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
+			<label for="guidance" style="margin-right: 10px">Guidance</label>
+				<input type="checkbox" id="guidance">
+			</div>
+			<div style="display: inline-block; width: 100%; margin-bottom: 10px">
 				<label for="additionalMods" style="margin-right: 10px">Additional modifiers</label>
 				<input type="text" id="additionalMods">
-			</div>
-	`,
+			</div>`,
 	buttons: {
 		yes: {
 			icon: "<i class='fas fa-check'></i>",
 			label: `Roll Initiative`,
 			callback: (html) => {
+				//Grabbing the actor assigned to this player.
 				var character = game.user.character;
+				//Grabbing the initiave bonus from the character details
 				var totalInitMod = game.user.character.getRollData().attributes.init.total;
+
+				//These are to be used if the provides additional modifiers.
 				var giftAlacrity = "";
 				var additionalMods = "";
+				var guidance = "";
 
 				//If Gift of Alacrity is checked, we add a 1d8 to the formula.
 				if (html.find('#giftAlacrity').is(":checked")) {
 					giftAlacrity = "+1d8";
+				}
+
+				//If Guidance is checked, we add a 1d8 to the formula.
+				if (html.find('#guidance').is(":checked")) {
+					guidance = "+1d4";
 				}
 
 				//If the Additional Mods textbox is not empty, we add it to the roll formula. If there's bad data, the roll does not happen.
@@ -48,7 +61,7 @@ new Dialog({
 					//{totalInitMod}: Because we set up the character in the User Config menu, we get this directly from the foundry character data
 					//{giftAlacrity}: Optional checkbox. If checked, adds +1d8 to the formula
 					//{additionalMods}: If textbox is not empty, adds the modifiers to the formula
-					game.user.character.rollInitiative({initiativeOptions: {formula: `1d20+${totalInitMod}${giftAlacrity}${additionalMods}` }});
+					game.user.character.rollInitiative({initiativeOptions: {formula: `1d20+${totalInitMod}${giftAlacrity}${guidance}${additionalMods}` }});
 				}
 
 
